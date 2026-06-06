@@ -1,0 +1,16 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    platform: linux/amd64
+    container_name: hospital-sqlserver
+    restart: always
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "${SA_PASSWORD:-mundoLibre2026*}"
+    ports:
+      - "1433:1433"
+    volumes:
+      - hospital_sqlserver_data:/var/opt/mssql
+
+volumes:
+  hospital_sqlserver_data:

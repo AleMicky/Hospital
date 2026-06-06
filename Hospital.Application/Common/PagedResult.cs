@@ -1,0 +1,19 @@
+namespace Hospital.Application.Common;
+
+public class PagedResult<T>
+{
+    public List<T> Items { get; init; } = [];
+    public int TotalCount { get; init; }
+    public int Page { get; init; }
+    public int PageSize { get; init; }
+    public int TotalPages => PageSize == 0 ? 0 : (int)Math.Ceiling(TotalCount / (double)PageSize);
+
+    public static PagedResult<T> Create(List<T> items, int totalCount, PagedQuery query) =>
+        new()
+        {
+            Items = items,
+            TotalCount = totalCount,
+            Page = query.NormalizedPage,
+            PageSize = query.NormalizedPageSize
+        };
+}
