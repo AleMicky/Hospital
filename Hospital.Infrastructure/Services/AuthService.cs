@@ -127,7 +127,7 @@ public class AuthService(
             new("nombreCompleto", user.NombreCompleto)
         };
         claims.AddRange(
-            roles.Select(role => new Claim(ClaimTypes.Role, role))
+            roles.Select(role => new Claim("role", role))
         );
 
         var key = new SymmetricSecurityKey(

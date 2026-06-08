@@ -27,3 +27,36 @@ export const authEndpoints = createEndpoints('/auth', (root) => ({
     me: `${root}/me`,
     logout: `${root}/logout`,
 }))
+
+export const roleEndpoints = createEndpoints('/roles')
+
+export const userEndpoints = createEndpoints('/users')
+
+export const catalogoGrupoEndpoints = createEndpoints(
+    '/catalogo-grupos',
+    (root) => ({
+        groupedItems: `${root}/items`,
+        itemsByGrupo: (id: EntityId) => `${root}/${id}/catalogo-items`,
+    }),
+)
+
+export const catalogoItemEndpoints = createEndpoints('/catalogo-items')
+
+export const pacienteEndpoints = createEndpoints('/pacientes')
+
+export const catalogoClinicoEndpoints = {
+    areas: createEndpoints('/catalogos/areas', (root) => ({
+        departamentos: (id: EntityId) => `${root}/${id}/departamentos`,
+    })),
+    departamentos: createEndpoints('/catalogos/departamentos', (root) => ({
+        servicios: (id: EntityId) => `${root}/${id}/servicios`,
+    })),
+    servicios: createEndpoints('/catalogos/servicios', (root) => ({
+        prestaciones: (id: EntityId) => `${root}/${id}/prestaciones`,
+    })),
+    prestaciones: createEndpoints('/catalogos/prestaciones'),
+    especialidades: createEndpoints('/catalogos/especialidades'),
+    profesiones: createEndpoints('/catalogos/profesiones'),
+    cargos: createEndpoints('/catalogos/cargos'),
+    tiposAtencion: createEndpoints('/catalogos/tipos-atencion'),
+} as const

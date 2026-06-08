@@ -2,7 +2,13 @@ import { Flex, Layout, Menu, theme, Typography } from 'antd'
 import { MedicineBoxOutlined } from '@ant-design/icons'
 import { useNavigate, useRouterState } from '@tanstack/react-router'
 
-import { buildFlatMenuItems, buildMenuItems } from './menu-items'
+import { authStore } from '../../../../stores/auth.store'
+import {
+    buildFlatMenuItems,
+    buildMenuItems,
+    findMenuItemByKey,
+    getSelectedMenuKey,
+} from './menu-items'
 
 const { Sider } = Layout
 const { Text } = Typography
@@ -16,12 +22,17 @@ type SidebarContentProps = {
 function SidebarContent({ collapsed, showBrandText, onNavigate }: SidebarContentProps) {
     const navigate = useNavigate()
     const pathname = useRouterState({ select: (state) => state.location.pathname })
+    const userRoles = authStore((state) => state.user?.roles ?? [])
     const { token } = theme.useToken()
 
-    const selectedKeys = [pathname === '/' ? '/' : pathname]
+    const selectedKeys = [getSelectedMenuKey(pathname, userRoles)]
 
     const handleMenuClick = ({ key }: { key: string }) => {
-        navigate({ to: key })
+        const item = findMenuItemByKey(key, userRoles)
+
+        if (!item?.to) return
+
+        navigate({ to: item.to })
         onNavigate?.()
     }
 
@@ -71,7 +82,11 @@ function SidebarContent({ collapsed, showBrandText, onNavigate }: SidebarContent
                 mode="inline"
                 inlineCollapsed={collapsed}
                 selectedKeys={selectedKeys}
-                items={collapsed ? buildFlatMenuItems() : buildMenuItems()}
+                items={
+                    collapsed
+                        ? buildFlatMenuItems(userRoles)
+                        : buildMenuItems(userRoles)
+                }
                 className="admin-sidebar__menu"
                 style={{ background: 'transparent', borderInlineEnd: 0 }}
                 onClick={handleMenuClick}

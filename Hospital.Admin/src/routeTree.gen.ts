@@ -13,6 +13,13 @@ import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as AdminRouteImport } from './routes/_admin'
 import { Route as AdminIndexRouteImport } from './routes/_admin/index'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
+import { Route as AdminUsuariosIndexRouteImport } from './routes/_admin/usuarios/index'
+import { Route as AdminRolesIndexRouteImport } from './routes/_admin/roles/index'
+import { Route as AdminPacientesIndexRouteImport } from './routes/_admin/pacientes/index'
+import { Route as AdminConfiguracionIndexRouteImport } from './routes/_admin/configuracion/index'
+import { Route as AdminCatalogosIndexRouteImport } from './routes/_admin/catalogos/index'
+import { Route as AdminCatalogoClinicoIndexRouteImport } from './routes/_admin/catalogo-clinico/index'
+import { Route as AdminUsuariosPerfilRouteImport } from './routes/_admin/usuarios/perfil'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/_auth',
@@ -32,14 +39,64 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => AuthRoute,
 } as any)
+const AdminUsuariosIndexRoute = AdminUsuariosIndexRouteImport.update({
+  id: '/usuarios/',
+  path: '/usuarios/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminRolesIndexRoute = AdminRolesIndexRouteImport.update({
+  id: '/roles/',
+  path: '/roles/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPacientesIndexRoute = AdminPacientesIndexRouteImport.update({
+  id: '/pacientes/',
+  path: '/pacientes/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminConfiguracionIndexRoute = AdminConfiguracionIndexRouteImport.update({
+  id: '/configuracion/',
+  path: '/configuracion/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCatalogosIndexRoute = AdminCatalogosIndexRouteImport.update({
+  id: '/catalogos/',
+  path: '/catalogos/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCatalogoClinicoIndexRoute =
+  AdminCatalogoClinicoIndexRouteImport.update({
+    id: '/catalogo-clinico/',
+    path: '/catalogo-clinico/',
+    getParentRoute: () => AdminRoute,
+  } as any)
+const AdminUsuariosPerfilRoute = AdminUsuariosPerfilRouteImport.update({
+  id: '/usuarios/perfil',
+  path: '/usuarios/perfil',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AdminIndexRoute
   '/login': typeof AuthLoginRoute
+  '/usuarios/perfil': typeof AdminUsuariosPerfilRoute
+  '/catalogo-clinico/': typeof AdminCatalogoClinicoIndexRoute
+  '/catalogos/': typeof AdminCatalogosIndexRoute
+  '/configuracion/': typeof AdminConfiguracionIndexRoute
+  '/pacientes/': typeof AdminPacientesIndexRoute
+  '/roles/': typeof AdminRolesIndexRoute
+  '/usuarios/': typeof AdminUsuariosIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof AdminIndexRoute
   '/login': typeof AuthLoginRoute
+  '/usuarios/perfil': typeof AdminUsuariosPerfilRoute
+  '/catalogo-clinico': typeof AdminCatalogoClinicoIndexRoute
+  '/catalogos': typeof AdminCatalogosIndexRoute
+  '/configuracion': typeof AdminConfiguracionIndexRoute
+  '/pacientes': typeof AdminPacientesIndexRoute
+  '/roles': typeof AdminRolesIndexRoute
+  '/usuarios': typeof AdminUsuariosIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -47,13 +104,50 @@ export interface FileRoutesById {
   '/_auth': typeof AuthRouteWithChildren
   '/_auth/login': typeof AuthLoginRoute
   '/_admin/': typeof AdminIndexRoute
+  '/_admin/usuarios/perfil': typeof AdminUsuariosPerfilRoute
+  '/_admin/catalogo-clinico/': typeof AdminCatalogoClinicoIndexRoute
+  '/_admin/catalogos/': typeof AdminCatalogosIndexRoute
+  '/_admin/configuracion/': typeof AdminConfiguracionIndexRoute
+  '/_admin/pacientes/': typeof AdminPacientesIndexRoute
+  '/_admin/roles/': typeof AdminRolesIndexRoute
+  '/_admin/usuarios/': typeof AdminUsuariosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/usuarios/perfil'
+    | '/catalogo-clinico/'
+    | '/catalogos/'
+    | '/configuracion/'
+    | '/pacientes/'
+    | '/roles/'
+    | '/usuarios/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login'
-  id: '__root__' | '/_admin' | '/_auth' | '/_auth/login' | '/_admin/'
+  to:
+    | '/'
+    | '/login'
+    | '/usuarios/perfil'
+    | '/catalogo-clinico'
+    | '/catalogos'
+    | '/configuracion'
+    | '/pacientes'
+    | '/roles'
+    | '/usuarios'
+  id:
+    | '__root__'
+    | '/_admin'
+    | '/_auth'
+    | '/_auth/login'
+    | '/_admin/'
+    | '/_admin/usuarios/perfil'
+    | '/_admin/catalogo-clinico/'
+    | '/_admin/catalogos/'
+    | '/_admin/configuracion/'
+    | '/_admin/pacientes/'
+    | '/_admin/roles/'
+    | '/_admin/usuarios/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -91,15 +185,78 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_admin/usuarios/': {
+      id: '/_admin/usuarios/'
+      path: '/usuarios'
+      fullPath: '/usuarios/'
+      preLoaderRoute: typeof AdminUsuariosIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/roles/': {
+      id: '/_admin/roles/'
+      path: '/roles'
+      fullPath: '/roles/'
+      preLoaderRoute: typeof AdminRolesIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/pacientes/': {
+      id: '/_admin/pacientes/'
+      path: '/pacientes'
+      fullPath: '/pacientes/'
+      preLoaderRoute: typeof AdminPacientesIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/configuracion/': {
+      id: '/_admin/configuracion/'
+      path: '/configuracion'
+      fullPath: '/configuracion/'
+      preLoaderRoute: typeof AdminConfiguracionIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/catalogos/': {
+      id: '/_admin/catalogos/'
+      path: '/catalogos'
+      fullPath: '/catalogos/'
+      preLoaderRoute: typeof AdminCatalogosIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/catalogo-clinico/': {
+      id: '/_admin/catalogo-clinico/'
+      path: '/catalogo-clinico'
+      fullPath: '/catalogo-clinico/'
+      preLoaderRoute: typeof AdminCatalogoClinicoIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/usuarios/perfil': {
+      id: '/_admin/usuarios/perfil'
+      path: '/usuarios/perfil'
+      fullPath: '/usuarios/perfil'
+      preLoaderRoute: typeof AdminUsuariosPerfilRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
 interface AdminRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminUsuariosPerfilRoute: typeof AdminUsuariosPerfilRoute
+  AdminCatalogoClinicoIndexRoute: typeof AdminCatalogoClinicoIndexRoute
+  AdminCatalogosIndexRoute: typeof AdminCatalogosIndexRoute
+  AdminConfiguracionIndexRoute: typeof AdminConfiguracionIndexRoute
+  AdminPacientesIndexRoute: typeof AdminPacientesIndexRoute
+  AdminRolesIndexRoute: typeof AdminRolesIndexRoute
+  AdminUsuariosIndexRoute: typeof AdminUsuariosIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminIndexRoute: AdminIndexRoute,
+  AdminUsuariosPerfilRoute: AdminUsuariosPerfilRoute,
+  AdminCatalogoClinicoIndexRoute: AdminCatalogoClinicoIndexRoute,
+  AdminCatalogosIndexRoute: AdminCatalogosIndexRoute,
+  AdminConfiguracionIndexRoute: AdminConfiguracionIndexRoute,
+  AdminPacientesIndexRoute: AdminPacientesIndexRoute,
+  AdminRolesIndexRoute: AdminRolesIndexRoute,
+  AdminUsuariosIndexRoute: AdminUsuariosIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)

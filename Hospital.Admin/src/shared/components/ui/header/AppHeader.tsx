@@ -5,9 +5,12 @@ import {
     MenuUnfoldOutlined,
     UserOutlined,
 } from '@ant-design/icons'
- 
+import { Link, useRouterState } from '@tanstack/react-router'
+
 import { ThemeToggle } from '../theme-toggle/ThemeToggle'
 import { useLogout, useMe } from '../../../../features/auth/hooks/auth.hooks'
+import { authStore } from '../../../../stores/auth.store'
+import { getBreadcrumbSegments } from '../sidebar/menu-items'
 
 const { Text } = Typography
 
@@ -18,9 +21,11 @@ type AppHeaderProps = {
 }
 
 export function AppHeader({ collapsed, isMobile, onToggleSidebar }: AppHeaderProps) {
- 
     const logout = useLogout()
     const { data: user } = useMe()
+    const pathname = useRouterState({ select: (state) => state.location.pathname })
+    const userRoles = authStore((state) => state.user?.roles ?? [])
+    const breadcrumbSegments = getBreadcrumbSegments(pathname, userRoles)
 
     const { token } = theme.useToken()
 
@@ -37,10 +42,23 @@ export function AppHeader({ collapsed, isMobile, onToggleSidebar }: AppHeaderPro
 
                 <Breadcrumb
                     className="admin-header__breadcrumb"
-                    items={[
-                        { title: 'Hospital Admin' },
-                        { title: 'Panel' },
-                    ]}
+                    items={breadcrumbSegments.map((segment, index) => {
+                        const isLast = index === breadcrumbSegments.length - 1
+
+                        return {
+                            title:
+                                segment.to && !isLast ? (
+                                    <Link
+                                        to={segment.to}
+                                        className="admin-header__breadcrumb-link"
+                                    >
+                                        {segment.title}
+                                    </Link>
+                                ) : (
+                                    segment.title
+                                ),
+                        }
+                    })}
                 />
             </Flex>
 

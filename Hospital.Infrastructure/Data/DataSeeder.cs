@@ -1,6 +1,7 @@
 using Hospital.Application.Common;
 using Hospital.Application.Interfaces;
 using Hospital.Domain.Entities;
+using Hospital.Infrastructure.Data.Seeders;
 using Hospital.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -20,18 +21,19 @@ public class DataSeeder(
     {
         await SeedRolesAsync(cancellationToken);
         await SeedAdminUserAsync(cancellationToken);
-        await SeedCatalogosAsync(cancellationToken);
+        await SeedCatalogosBasicosAsync(cancellationToken);
+        await SeedCatalogosClinicaAsync(cancellationToken);
     }
 
     private async Task SeedRolesAsync(CancellationToken cancellationToken)
     {
         foreach (var roleName in AppRoles.All)
         {
-            if (!await roleManager.RoleExistsAsync(roleName))
-            {
-                await roleManager.CreateAsync(new IdentityRole<int>(roleName));
-                logger.LogInformation("Rol creado: {Role}", roleName);
-            }
+            if (await roleManager.RoleExistsAsync(roleName))
+                continue;
+
+            await roleManager.CreateAsync(new IdentityRole<int>(roleName));
+            logger.LogInformation("Rol creado: {Role}", roleName);
         }
     }
 
@@ -62,12 +64,31 @@ public class DataSeeder(
         }
 
         await userManager.AddToRoleAsync(admin, AppRoles.Admin);
+
         logger.LogInformation(
             "Usuario admin creado: {UserName}. Cambia la contraseña en producción.",
             options.AdminUserName);
     }
 
-    private async Task SeedCatalogosAsync(CancellationToken cancellationToken)
+    private async Task SeedCatalogosClinicaAsync(CancellationToken cancellationToken)
+    {
+        ISeeder[] seeders =
+        [
+            new AreaSeeder(context),
+            new DepartamentoSeeder(context),
+            new ServicioSeeder(context),
+            new ProfesionSeeder(context),
+            new EspecialidadSeeder(context),
+            new CargoSeeder(context)
+        ];
+
+        foreach (var seeder in seeders)
+        {
+            await seeder.SeedAsync(cancellationToken);
+        }
+    }
+
+    private async Task SeedCatalogosBasicosAsync(CancellationToken cancellationToken)
     {
         await SeedCatalogoGrupoAsync(
             "SEXO",
@@ -141,8 +162,10 @@ public class DataSeeder(
                 CreatedBy = "Sistema",
                 Activo = true
             };
+
             context.CatalogoGrupos.Add(grupo);
             await context.SaveChangesAsync(cancellationToken);
+
             logger.LogInformation("Catálogo creado: {Codigo}", codigo);
         }
 

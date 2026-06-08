@@ -1,10 +1,13 @@
 using Hospital.Application.Interfaces;
 using Hospital.Domain.Common;
 using Hospital.Domain.Entities;
+using Hospital.Domain.Entities.Catalogos;
 using Hospital.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using TipoAtencionCatalogo = Hospital.Domain.Entities.Catalogos.TipoAtencion;
+using TipoAtencionClinico = Hospital.Domain.Entities.TipoAtencion;
 
 namespace Hospital.Infrastructure.Data;
 
@@ -37,11 +40,21 @@ public class AppDbContext(
     public DbSet<Paciente> Pacientes => Set<Paciente>();
     public DbSet<CatalogoGrupo> CatalogoGrupos => Set<CatalogoGrupo>();
     public DbSet<CatalogoItem> CatalogoItems => Set<CatalogoItem>();
-    public DbSet<TipoAtencion> TiposAtencion => Set<TipoAtencion>();
+    public DbSet<TipoAtencionClinico> TiposAtencion => Set<TipoAtencionClinico>();
     public DbSet<Formulario> Formularios => Set<Formulario>();
     public DbSet<FormularioCampo> FormularioCampos => Set<FormularioCampo>();
     public DbSet<Atencion> Atenciones => Set<Atencion>();
     public DbSet<AtencionValor> AtencionValores => Set<AtencionValor>();
+    
+    // Catalogos
+    public DbSet<Area> Areas => Set<Area>();
+    public DbSet<Departamento> Departamentos => Set<Departamento>();
+    public DbSet<Servicio> Servicios => Set<Servicio>();
+    public DbSet<Prestacion> Prestaciones => Set<Prestacion>();
+    public DbSet<TipoAtencionCatalogo> CatalogoTiposAtencion => Set<TipoAtencionCatalogo>();
+    public DbSet<Especialidad> Especialidades => Set<Especialidad>();
+    public DbSet<Profesion> Profesiones => Set<Profesion>();
+    public DbSet<Cargo> Cargos => Set<Cargo>();
     
     private void ApplyAudit()
     {

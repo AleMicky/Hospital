@@ -2,6 +2,7 @@ using Hospital.Application.Interfaces;
 using Hospital.Infrastructure.Data;
 using Hospital.Infrastructure.Identity;
 using Hospital.Infrastructure.Services;
+using Hospital.Infrastructure.Services.Catalogos;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -39,6 +40,15 @@ public static class DependencyInjection
         services.AddScoped<IFormularioCampoService, FormularioCampoService>();
         services.AddScoped<IAtencionService, AtencionService>();
         services.AddScoped<IAtencionValorService, AtencionValorService>();
+
+        services.AddScoped<IAreaService, AreaService>();
+        services.AddScoped<IDepartamentoService, DepartamentoService>();
+        services.AddScoped<IServicioService, ServicioService>();
+        services.AddScoped<IPrestacionService, PrestacionService>();
+        services.AddScoped<IEspecialidadService, EspecialidadService>();
+        services.AddScoped<IProfesionService, ProfesionService>();
+        services.AddScoped<ICargoService, CargoService>();
+        services.AddScoped<ITipoAtencionCatalogoService, TipoAtencionCatalogoService>();
         
         return services;
     }

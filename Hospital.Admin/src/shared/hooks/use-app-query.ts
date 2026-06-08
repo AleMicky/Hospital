@@ -5,6 +5,7 @@ import {
 } from '@tanstack/react-query'
 
 import { notify } from '../utils/notify'
+import { getApiErrorMessage } from '../utils/api-error'
 
 export function useAppQuery<
     TQueryFnData,
@@ -24,12 +25,7 @@ export function useAppQuery<
         ...options,
 
         throwOnError: (error) => {
-            const message =
-                error instanceof Error
-                    ? error.message
-                    : 'Ocurrió un error inesperado.'
-
-            notify.error('Error', message)
+            notify.error('Error', getApiErrorMessage(error))
 
             return false
         },
