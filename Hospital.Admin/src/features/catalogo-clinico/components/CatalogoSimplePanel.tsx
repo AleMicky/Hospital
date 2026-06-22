@@ -3,7 +3,7 @@ import {
     createColumnHelper,
     type ColumnDef,
 } from '@tanstack/react-table'
-import { Button, Flex, Input, Popconfirm, Space, Tag, Typography, theme } from 'antd'
+import { Button, Flex, Grid, Input, Popconfirm, Space, Tag, Typography, theme } from 'antd'
 import {
     DeleteOutlined,
     EditOutlined,
@@ -17,6 +17,7 @@ import type { CatalogoBaseFormValues } from '../schemas/catalogo-clinico.schema'
 import type { CatalogoBase } from '../types/catalogo-clinico.types'
 
 const { Text } = Typography
+const { useBreakpoint } = Grid
 
 type CatalogoSimplePanelProps = {
     title: string
@@ -60,6 +61,8 @@ export function CatalogoSimplePanel({
     onDelete,
 }: CatalogoSimplePanelProps) {
     const { token } = theme.useToken()
+    const screens = useBreakpoint()
+    const isMobile = !screens.md
     const [searchInput, setSearchInput] = useState(search)
     const [modalOpen, setModalOpen] = useState(false)
     const [editing, setEditing] = useState<CatalogoBase | null>(null)
@@ -148,7 +151,7 @@ export function CatalogoSimplePanel({
     return (
         <div className="catalogo-clinico-panel">
             <div className="catalogo-clinico-panel__head">
-                <div>
+                <div className="catalogo-clinico-panel__head-text">
                     <Text strong className="catalogo-clinico-panel__title">
                         {title}
                     </Text>
@@ -159,6 +162,8 @@ export function CatalogoSimplePanel({
                 <Button
                     type="primary"
                     icon={<PlusOutlined />}
+                    block={isMobile}
+                    className="catalogo-clinico-panel__create-btn"
                     onClick={() => {
                         setEditing(null)
                         setModalOpen(true)

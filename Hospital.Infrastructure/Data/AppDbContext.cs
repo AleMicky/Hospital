@@ -1,6 +1,7 @@
 using Hospital.Application.Interfaces;
 using Hospital.Domain.Common;
 using Hospital.Domain.Entities;
+using Hospital.Domain.Entities.Personas;
 using Hospital.Domain.Entities.Catalogos;
 using Hospital.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
@@ -37,6 +38,7 @@ public class AppDbContext(
     }
     
     
+    public DbSet<Persona> Personas => Set<Persona>();
     public DbSet<Paciente> Pacientes => Set<Paciente>();
     public DbSet<CatalogoGrupo> CatalogoGrupos => Set<CatalogoGrupo>();
     public DbSet<CatalogoItem> CatalogoItems => Set<CatalogoItem>();

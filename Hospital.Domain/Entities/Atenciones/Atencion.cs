@@ -1,4 +1,5 @@
 using Hospital.Domain.Common;
+using Hospital.Domain.Entities.Personas;
 
 namespace Hospital.Domain.Entities;
 

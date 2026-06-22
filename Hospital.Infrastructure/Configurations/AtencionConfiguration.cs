@@ -1,4 +1,5 @@
 using Hospital.Domain.Entities;
+using Hospital.Domain.Entities.Personas;
 using Hospital.Infrastructure.Configurations.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -37,7 +38,7 @@ public class AtencionConfiguration : IEntityTypeConfiguration<Atencion>
             .HasMaxLength(500);
 
         builder.HasOne(x => x.Paciente)
-            .WithMany(x => x.Atenciones)
+            .WithMany()
             .HasForeignKey(x => x.PacienteId)
             .OnDelete(DeleteBehavior.Restrict);
 

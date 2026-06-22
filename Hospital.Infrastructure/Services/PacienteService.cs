@@ -2,7 +2,7 @@ using Hospital.Application.Common;
 using Hospital.Application.DTOs.Pacientes;
 using Hospital.Application.Exceptions;
 using Hospital.Application.Interfaces;
-using Hospital.Domain.Entities;
+using Hospital.Domain.Entities.Personas;
 using Hospital.Infrastructure.Data;
 using Hospital.Infrastructure.Mappings;
 using Microsoft.EntityFrameworkCore;
@@ -49,15 +49,18 @@ public class PacienteService(AppDbContext context) : IPacienteService
         return paciente.Id;
     }
 
-    public async Task<PagedResult<PacienteResponseDto>> GetPagedAsync(
-        PagedQuery query)
+    public async Task<PagedResult<PacienteResponseDto>> GetPagedAsync(PagedQuery query)
     {
         var q = context.Pacientes
             .AsNoTracking()
-            .Include(x => x.TipoDocumento)
-            .Include(x => x.ExtensionDocumento)
-            .Include(x => x.Sexo)
-            .Include(x => x.EstadoCivil)
+            .Include(x => x.Persona)
+                .ThenInclude(x => x.TipoDocumento)
+            .Include(x => x.Persona)
+                .ThenInclude(x => x.ExtensionDocumento)
+            .Include(x => x.Persona)
+                .ThenInclude(x => x.Sexo)
+            .Include(x => x.Persona)
+                .ThenInclude(x => x.EstadoCivil)
             .Where(x => x.Activo);
 
         if (!string.IsNullOrWhiteSpace(query.Search))
@@ -66,14 +69,14 @@ public class PacienteService(AppDbContext context) : IPacienteService
 
             q = q.Where(x =>
                 x.CodigoPaciente.Contains(search) ||
-                x.Nombres.Contains(search) ||
-                x.ApellidoPaterno.Contains(search) ||
-                x.ApellidoMaterno.Contains(search) ||
-                x.NumeroDocumento.Contains(search));
+                x.Persona.Nombres.Contains(search) ||
+                x.Persona.ApellidoPaterno.Contains(search) ||
+                x.Persona.ApellidoMaterno.Contains(search) ||
+                x.Persona.NumeroDocumento.Contains(search));
         }
 
-        q = q.OrderBy(x => x.ApellidoPaterno)
-            .ThenBy(x => x.Nombres);
+        q = q.OrderBy(x => x.Persona.ApellidoPaterno)
+            .ThenBy(x => x.Persona.Nombres);
 
         var totalCount = await q.CountAsync();
 
@@ -93,32 +96,18 @@ public class PacienteService(AppDbContext context) : IPacienteService
         );
     }
 
-    public async Task<List<PacienteResponseDto>> GetAllAsync()
-    {
-        var pacientes = await context.Pacientes
-            .AsNoTracking()
-            .Include(x => x.TipoDocumento)
-            .Include(x => x.ExtensionDocumento)
-            .Include(x => x.Sexo)
-            .Include(x => x.EstadoCivil)
-            .Where(x => x.Activo)
-            .OrderBy(x => x.ApellidoPaterno)
-            .ThenBy(x => x.Nombres)
-            .ToListAsync();
-
-        return pacientes
-            .Select(MapToResponse)
-            .ToList();
-    }
-
     public async Task<PacienteResponseDto?> GetByIdAsync(int id)
     {
         var paciente = await context.Pacientes
             .AsNoTracking()
-            .Include(x => x.TipoDocumento)
-            .Include(x => x.ExtensionDocumento)
-            .Include(x => x.Sexo)
-            .Include(x => x.EstadoCivil)
+            .Include(x => x.Persona)
+                .ThenInclude(x => x.TipoDocumento)
+            .Include(x => x.Persona)
+                .ThenInclude(x => x.ExtensionDocumento)
+            .Include(x => x.Persona)
+                .ThenInclude(x => x.Sexo)
+            .Include(x => x.Persona)
+                .ThenInclude(x => x.EstadoCivil)
             .FirstOrDefaultAsync(x =>
                 x.Id == id &&
                 x.Activo);
@@ -128,9 +117,7 @@ public class PacienteService(AppDbContext context) : IPacienteService
             : MapToResponse(paciente);
     }
 
-    public async Task UpdateAsync(
-        int id,
-        UpdatePacienteDto dto)
+    public async Task UpdateAsync(int id, UpdatePacienteDto dto)
     {
         await ValidateCatalogosAsync(
             dto.TipoDocumentoId,
@@ -140,6 +127,7 @@ public class PacienteService(AppDbContext context) : IPacienteService
         );
 
         var entity = await context.Pacientes
+            .Include(x => x.Persona)
             .FirstOrDefaultAsync(x =>
                 x.Id == id &&
                 x.Activo);
@@ -152,7 +140,7 @@ public class PacienteService(AppDbContext context) : IPacienteService
             dto.NumeroDocumento,
             dto.ComplementoDocumento,
             dto.ExtensionDocumentoId,
-            id
+            entity.PersonaId
         );
 
         if (documentoExists)
@@ -183,7 +171,7 @@ public class PacienteService(AppDbContext context) : IPacienteService
         string numeroDocumento,
         string? complementoDocumento,
         int? extensionDocumentoId,
-        int? excludePacienteId = null)
+        int? excludePersonaId = null)
     {
         var numero = numeroDocumento.Trim();
 
@@ -191,14 +179,14 @@ public class PacienteService(AppDbContext context) : IPacienteService
             ? null
             : complementoDocumento.Trim();
 
-        return await context.Pacientes.AnyAsync(x =>
+        return await context.Personas.AnyAsync(x =>
             x.Activo &&
             x.TipoDocumentoId == tipoDocumentoId &&
             x.NumeroDocumento == numero &&
             x.ComplementoDocumento == complemento &&
             x.ExtensionDocumentoId == extensionDocumentoId &&
-            (!excludePacienteId.HasValue ||
-             x.Id != excludePacienteId.Value)
+            (!excludePersonaId.HasValue ||
+             x.Id != excludePersonaId.Value)
         );
     }
 
@@ -208,33 +196,16 @@ public class PacienteService(AppDbContext context) : IPacienteService
         int sexoId,
         int estadoCivilId)
     {
-        await ValidateCatalogoItemAsync(
-            tipoDocumentoId,
-            "TIPO_DOCUMENTO"
-        );
+        await ValidateCatalogoItemAsync(tipoDocumentoId, "TIPO_DOCUMENTO");
 
         if (extensionDocumentoId.HasValue)
-        {
-            await ValidateCatalogoItemAsync(
-                extensionDocumentoId.Value,
-                "EXTENSION_DOCUMENTO"
-            );
-        }
+            await ValidateCatalogoItemAsync(extensionDocumentoId.Value, "EXTENSION_DOCUMENTO");
 
-        await ValidateCatalogoItemAsync(
-            sexoId,
-            "SEXO"
-        );
-
-        await ValidateCatalogoItemAsync(
-            estadoCivilId,
-            "ESTADO_CIVIL"
-        );
+        await ValidateCatalogoItemAsync(sexoId, "SEXO");
+        await ValidateCatalogoItemAsync(estadoCivilId, "ESTADO_CIVIL");
     }
 
-    private async Task ValidateCatalogoItemAsync(
-        int catalogoItemId,
-        string grupoCodigo)
+    private async Task ValidateCatalogoItemAsync(int catalogoItemId, string grupoCodigo)
     {
         var exists = await context.CatalogoItems
             .AnyAsync(x =>
@@ -243,31 +214,27 @@ public class PacienteService(AppDbContext context) : IPacienteService
                 x.CatalogoGrupo.Codigo == grupoCodigo);
 
         if (!exists)
-        {
-            throw new BadRequestException(
-                $"El catálogo '{grupoCodigo}' no es válido."
-            );
-        }
+            throw new BadRequestException($"El catálogo '{grupoCodigo}' no es válido.");
     }
 
     private PacienteResponseDto MapToResponse(Paciente paciente)
     {
         var dto = _mapper.ToDto(paciente);
+        var persona = paciente.Persona;
 
         return dto with
         {
-            TipoDocumento = paciente.TipoDocumento.Nombre,
-            ExtensionDocumento = paciente.ExtensionDocumento?.Codigo,
-            Sexo = paciente.Sexo.Nombre,
-            EstadoCivil = paciente.EstadoCivil.Nombre,
-            Edad = CalcularEdad(paciente.FechaNacimiento)
+            TipoDocumento = persona.TipoDocumento.Nombre,
+            ExtensionDocumento = persona.ExtensionDocumento?.Codigo,
+            Sexo = persona.Sexo.Nombre,
+            EstadoCivil = persona.EstadoCivil.Nombre,
+            Edad = CalcularEdad(persona.FechaNacimiento)
         };
     }
 
     private static int CalcularEdad(DateOnly fechaNacimiento)
     {
         var today = DateOnly.FromDateTime(DateTime.Today);
-
         var edad = today.Year - fechaNacimiento.Year;
 
         if (fechaNacimiento > today.AddYears(-edad))

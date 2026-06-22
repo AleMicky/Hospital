@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
+    Breadcrumb,
     Button,
     Col,
     Empty,
     Flex,
+    Grid,
     Input,
     Row,
     Tag,
@@ -12,6 +14,7 @@ import {
 } from 'antd'
 import {
     ApartmentOutlined,
+    ArrowLeftOutlined,
     BankOutlined,
     ExperimentOutlined,
     PlusOutlined,
@@ -51,10 +54,15 @@ import type {
 import type { Area, Departamento, Prestacion, Servicio } from '../types/catalogo-clinico.types'
 
 const { Text, Title } = Typography
+const { useBreakpoint } = Grid
 const DEFAULT_PAGE_SIZE = 15
+
+type HierarchyStep = 'area' | 'departamento' | 'servicio' | 'prestacion'
 
 export function CatalogoJerarquiaPanel() {
     const { token } = theme.useToken()
+    const screens = useBreakpoint()
+    const isMobile = !screens.md
 
     const [areaPage, setAreaPage] = useState(1)
     const [areaSearch, setAreaSearch] = useState('')
@@ -127,6 +135,29 @@ export function CatalogoJerarquiaPanel() {
     const isSavingDept = createDept.isPending || updateDept.isPending
     const isSavingServicio = createServicio.isPending || updateServicio.isPending
     const isSavingPrestacion = createPrestacion.isPending || updatePrestacion.isPending
+
+    const mobileStep = useMemo<HierarchyStep>(() => {
+        if (!selectedArea) return 'area'
+        if (!selectedDept) return 'departamento'
+        if (!selectedServicio) return 'servicio'
+        return 'prestacion'
+    }, [selectedArea, selectedDept, selectedServicio])
+
+    const handleMobileBack = () => {
+        if (mobileStep === 'prestacion') {
+            setSelectedServicio(null)
+            return
+        }
+        if (mobileStep === 'servicio') {
+            setSelectedDept(null)
+            return
+        }
+        if (mobileStep === 'departamento') {
+            setSelectedArea(null)
+        }
+    }
+
+    const showMobileColumn = (step: HierarchyStep) => !isMobile || mobileStep === step
 
     const handleAreaSubmit = async (values: CatalogoBaseFormValues) => {
         const payload = {
@@ -202,14 +233,89 @@ export function CatalogoJerarquiaPanel() {
         <div className="catalogo-clinico-jerarquia">
             <div className="catalogo-clinico-jerarquia__intro">
                 <Text type="secondary">
-                    Navegue de izquierda a derecha: área → departamento → servicio →
-                    prestación. Cada nivel desbloquea el siguiente.
+                    {isMobile
+                        ? 'Seleccione cada nivel en orden: área, departamento, servicio y prestación.'
+                        : 'Navegue de izquierda a derecha: área → departamento → servicio → prestación. Cada nivel desbloquea el siguiente.'}
                 </Text>
             </div>
+
+            {isMobile ? (
+                <div className="catalogo-clinico-jerarquia__mobile-nav">
+                    {mobileStep !== 'area' ? (
+                        <Button
+                            type="text"
+                            size="small"
+                            icon={<ArrowLeftOutlined />}
+                            onClick={handleMobileBack}
+                            className="catalogo-clinico-jerarquia__back"
+                        >
+                            Volver
+                        </Button>
+                    ) : null}
+
+                    <Breadcrumb
+                        className="catalogo-clinico-jerarquia__breadcrumb"
+                        items={[
+                            {
+                                title: (
+                                    <button
+                                        type="button"
+                                        className="catalogo-clinico-jerarquia__crumb"
+                                        onClick={() => {
+                                            setSelectedArea(null)
+                                            setSelectedDept(null)
+                                            setSelectedServicio(null)
+                                        }}
+                                    >
+                                        Áreas
+                                    </button>
+                                ),
+                            },
+                            ...(selectedArea
+                                ? [
+                                      {
+                                          title: (
+                                              <button
+                                                  type="button"
+                                                  className="catalogo-clinico-jerarquia__crumb"
+                                                  onClick={() => {
+                                                      setSelectedDept(null)
+                                                      setSelectedServicio(null)
+                                                  }}
+                                              >
+                                                  {selectedArea.nombre}
+                                              </button>
+                                          ),
+                                      },
+                                  ]
+                                : []),
+                            ...(selectedDept
+                                ? [
+                                      {
+                                          title: (
+                                              <button
+                                                  type="button"
+                                                  className="catalogo-clinico-jerarquia__crumb"
+                                                  onClick={() => setSelectedServicio(null)}
+                                              >
+                                                  {selectedDept.nombre}
+                                              </button>
+                                          ),
+                                      },
+                                  ]
+                                : []),
+                            ...(selectedServicio
+                                ? [{ title: selectedServicio.nombre }]
+                                : []),
+                        ]}
+                    />
+                </div>
+            ) : null}
 
             <div className="catalogo-clinico-jerarquia__scroll">
                 <Row gutter={[12, 16]} className="catalogo-clinico-jerarquia__columns">
                     {/* Áreas */}
+                    {showMobileColumn('area') ? (
                     <Col xs={24} sm={12} xl={6}>
                         <section className="catalogo-clinico-column">
                             <div className="catalogo-clinico-column__header">
@@ -286,8 +392,10 @@ export function CatalogoJerarquiaPanel() {
                             />
                         </section>
                     </Col>
+                    ) : null}
 
                     {/* Departamentos */}
+                    {showMobileColumn('departamento') ? (
                     <Col xs={24} sm={12} xl={6}>
                         <section
                             className={[
@@ -367,8 +475,10 @@ export function CatalogoJerarquiaPanel() {
                             )}
                         </section>
                     </Col>
+                    ) : null}
 
                     {/* Servicios */}
+                    {showMobileColumn('servicio') ? (
                     <Col xs={24} sm={12} xl={6}>
                         <section
                             className={[
@@ -446,8 +556,10 @@ export function CatalogoJerarquiaPanel() {
                             )}
                         </section>
                     </Col>
+                    ) : null}
 
                     {/* Prestaciones */}
+                    {showMobileColumn('prestacion') ? (
                     <Col xs={24} sm={12} xl={6}>
                         <section
                             className={[
@@ -522,6 +634,7 @@ export function CatalogoJerarquiaPanel() {
                             )}
                         </section>
                     </Col>
+                    ) : null}
                 </Row>
             </div>
 

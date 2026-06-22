@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Col, Flex, Grid, Row, Statistic, Typography } from 'antd'
+import { Col, Flex, Grid, Row, Typography } from 'antd'
 import { DatabaseOutlined } from '@ant-design/icons'
 
 import {
@@ -149,6 +149,7 @@ function SimpleCatalogSection({
 
 export function CatalogoClinicoView() {
     const screens = useBreakpoint()
+    const isMobile = !screens.md
     const isStacked = !screens.lg
     const [section, setSection] = useState<CatalogoClinicoSection>('jerarquia')
     const meta = getSectionMeta(section)
@@ -162,7 +163,7 @@ export function CatalogoClinicoView() {
                     gap={16}
                     wrap="wrap"
                 >
-                    <Flex align="center" gap={16}>
+                    <Flex align="center" gap={16} className="catalogo-clinico-view__header-main">
                         <div className="catalogo-clinico-view__header-icon" aria-hidden>
                             <DatabaseOutlined />
                         </div>
@@ -170,41 +171,65 @@ export function CatalogoClinicoView() {
                             <Title level={3} className="catalogo-clinico-view__title">
                                 Catálogo clínico
                             </Title>
-                            <Text type="secondary">
+                            <Text type="secondary" className="catalogo-clinico-view__subtitle">
                                 Estructura organizacional, prestaciones y catálogos del
                                 personal de salud.
                             </Text>
                         </div>
                     </Flex>
 
-                    <div className="catalogo-clinico-view__stat">
-                        <Statistic
-                            title="Sección activa"
-                            value={meta.title}
-                            valueStyle={{ fontSize: 16 }}
-                        />
+                    <div className="catalogo-clinico-view__section-badge">
+                        <span className="catalogo-clinico-view__section-badge-icon" aria-hidden>
+                            {meta.icon}
+                        </span>
+                        <div className="catalogo-clinico-view__section-badge-content">
+                            <Text type="secondary" className="catalogo-clinico-view__section-badge-label">
+                                Sección activa
+                            </Text>
+                            <Text strong className="catalogo-clinico-view__section-badge-title">
+                                {meta.title}
+                            </Text>
+                        </div>
                     </div>
                 </Flex>
             </header>
 
-            <Row gutter={[20, 20]} className="catalogo-clinico-view__layout">
-                <Col xs={24} lg={6} xl={5}>
-                    <CatalogoClinicoSidebar
-                        activeSection={section}
-                        onSectionChange={setSection}
-                    />
-                </Col>
+            {isMobile ? (
+                <CatalogoClinicoSidebar
+                    activeSection={section}
+                    onSectionChange={setSection}
+                    variant="tabs"
+                />
+            ) : null}
 
-                <Col xs={24} lg={18} xl={19}>
-                    <section className="catalogo-clinico-view__content">
-                        {section === 'jerarquia' ? (
-                            <CatalogoJerarquiaPanel />
-                        ) : (
-                            <SimpleCatalogSection section={section} />
-                        )}
-                    </section>
-                </Col>
-            </Row>
+            <div className="catalogo-clinico-view__workspace">
+                <Row gutter={[20, 20]} className="catalogo-clinico-view__layout">
+                    {!isMobile ? (
+                        <Col xs={24} lg={6} xl={5}>
+                            <CatalogoClinicoSidebar
+                                activeSection={section}
+                                onSectionChange={setSection}
+                            />
+                        </Col>
+                    ) : null}
+
+                    <Col xs={24} lg={isMobile ? 24 : 18} xl={isMobile ? 24 : 19}>
+                        <section className="catalogo-clinico-view__content">
+                            {isMobile ? (
+                                <div className="catalogo-clinico-view__content-intro">
+                                    <Text type="secondary">{meta.description}</Text>
+                                </div>
+                            ) : null}
+
+                            {section === 'jerarquia' ? (
+                                <CatalogoJerarquiaPanel />
+                            ) : (
+                                <SimpleCatalogSection section={section} />
+                            )}
+                        </section>
+                    </Col>
+                </Row>
+            </div>
         </div>
     )
 }

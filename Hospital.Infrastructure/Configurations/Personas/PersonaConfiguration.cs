@@ -1,24 +1,17 @@
 using Hospital.Domain.Entities;
+using Hospital.Domain.Entities.Personas;
 using Hospital.Infrastructure.Configurations.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Hospital.Infrastructure.Configurations;
+namespace Hospital.Infrastructure.Configurations.Personas;
 
-public class PacienteConfiguration : IEntityTypeConfiguration<Paciente>
+public class PersonaConfiguration : IEntityTypeConfiguration<Persona>
 {
-    public void Configure(EntityTypeBuilder<Paciente> builder)
+    public void Configure(EntityTypeBuilder<Persona> builder)
     {
-        builder.ToTable("Pacientes");
-
+        builder.ToTable("Personas", "Personas");
         builder.ConfigureAuditableEntity();
-
-        builder.Property(x => x.CodigoPaciente)
-            .HasMaxLength(30)
-            .IsRequired();
-
-        builder.HasIndex(x => x.CodigoPaciente)
-            .IsUnique();
 
         builder.Property(x => x.Nombres)
             .HasMaxLength(150)
@@ -47,9 +40,6 @@ public class PacienteConfiguration : IEntityTypeConfiguration<Paciente>
 
         builder.Property(x => x.Direccion)
             .HasMaxLength(250);
-
-        builder.Property(x => x.OcupacionProfesion)
-            .HasMaxLength(150);
 
         builder.HasOne(x => x.TipoDocumento)
             .WithMany()
